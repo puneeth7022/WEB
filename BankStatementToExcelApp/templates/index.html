@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 28px;">
+    <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Darshan Logo" style="height: 70px;">
+    <h2 style="margin: 0; color: #333;"></h2>
+</div>
+
+    <meta charset="UTF-8">
+    <title>Upload Bank Statement PDF</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            background-color: white;
+            border-radius: 4px;
+        }
+
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007acc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #005fa3;
+        }
+
+        table {
+            width: 95%;
+            margin: auto;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+        }
+
+        .download-btn {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .download-btn a {
+            text-decoration: none;
+            background-color: #28a745;
+            padding: 10px 20px;
+            color: white;
+            border-radius: 4px;
+        }
+
+        .download-btn a:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h2>Upload Bank Statement PDF</h2>
+
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="pdf_file" multiple required>
+        <input type="submit" value="Convert to Excel">
+    </form>
+
+    {% if table %}
+        <div class="table-container">
+            <h3 style="text-align:center;">Preview of Converted Data</h3>
+            {{ table|safe }}
+        </div>
+        <div class="download-btn">
+            <a href="/download">Download Excel</a>
+        </div>
+        
+    
+
+        <div style="text-align: center; margin-bottom: 10px;">
+    <span style="font-size: 16px; color: #555;">Made with ❤️ by</span>
+    <span style="font-size: 18px; font-weight: bold; color: #007acc;">Darshan</span>
+</div>
+
+
+    {% endif %}
+</body>
+</html>
