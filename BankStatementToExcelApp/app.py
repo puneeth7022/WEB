@@ -29,7 +29,8 @@ def upload_files():
         file.save(filepath)
 
         with pdfplumber.open(filepath) as pdf:
-            for page in pdf.pages:
+            for i in range(len(pdf.pages)):
+                page = pdf.pages[i]
                 text = page.extract_text()
                 if not text:
                     continue
