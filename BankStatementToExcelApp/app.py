@@ -65,10 +65,13 @@ def upload_files():
                     else:
                         continue
 
+                    # Check for bank charges in Payment vouchers below Rs. 50
+                    by_dr_text = "BANK CHARGES" if voucher_type == "Payment" and amount < 50 else ""
+
                     all_data.append({
                         "DATE": date,
                         "VOUCHER NO.": "",
-                        "BY / DR": "",
+                        "BY / DR": by_dr_text,
                         "TO / CR": "",
                         "AMOUNT": amount,
                         "NARRATION": narration,
@@ -97,3 +100,4 @@ if __name__ == "__main__":
     import os
     print("✅ Flask server started on Render")
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
