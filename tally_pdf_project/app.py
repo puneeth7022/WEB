@@ -5,9 +5,6 @@ import os
 from xml.etree.ElementTree import Element, SubElement, tostring
 from xml.dom.minidom import parseString
 from datetime import datetime
-import os
-app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-app.run(debug=True)
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -15,6 +12,7 @@ app.secret_key = 'your_secret_key'
 UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'output'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
 
 bank_ledger_names = {
     "canara": "Canara Bank",
@@ -148,24 +146,8 @@ def download_excel():
 
 @app.route('/download/xml')
 def download_xml():
-    from flask import Flask, render_template, request, send_file
-import os
-
-app = Flask(__name__)
-
-# --- Your routes and logic go here ---
-@app.route('/')
-def home():
-    return render_template("index.html")
-
-# Add your other routes here...
-
-# --- This part must be at the END ---
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-
     return send_file("output/statement.xml", as_attachment=True)
 
 if __name__ == '__main__':
     print("✅ Flask server started on http://127.0.0.1:5000")
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
