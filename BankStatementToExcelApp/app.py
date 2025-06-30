@@ -42,32 +42,30 @@ def upload_files():
                         continue
 
                     try:
-                        withdraw_str = parts[-3].replace(",", "").strip()
-                        deposit_str = parts[-2].replace(",", "").strip()
-
+                        withdraw_str = parts[-2].replace(",", "").strip()
                         withdraw = float(withdraw_str)
-                        deposit = float(deposit_str)
+                        deposit = 0.0
                     except ValueError:
                         continue
 
-                    if withdraw == 0 and deposit == 0:
+                    if withdraw == 0:
                         continue
 
-                    narration = ' '.join(parts[2:-3])
+                    narration_text = ' '.join(parts[1:-3]).upper()
                     date = parts[0]
 
-                    if deposit > 0:
-                        amount = deposit
+                    is_card_sale = 'UPI' in narration_text or 'CARD' in narration_text
+
+                    if is_card_sale:
                         voucher_type = "Receipt"
-                        by_dr_text = ""
-                        to_cr_text = "SUSPENSE"
-                    elif withdraw > 0:
                         amount = withdraw
+                        by_dr_text = ""
+                        to_cr_text = "CARD SALES"
+                    else:
                         voucher_type = "Payment"
+                        amount = withdraw
                         by_dr_text = "BANK CHARGES" if amount < 50 else "SUSPENSE"
                         to_cr_text = ""
-                    else:
-                        continue
 
                     all_data.append({
                         "DATE": date,
@@ -75,7 +73,7 @@ def upload_files():
                         "BY / DR": by_dr_text,
                         "TO / CR": to_cr_text,
                         "AMOUNT": amount,
-                        "NARRATION": narration,
+                        "NARRATION": narration_text,
                         "VOUCHER TYPE": voucher_type,
                         "DAY": ""
                     })
@@ -96,11 +94,6 @@ def download_file():
     if last_output_path and os.path.exists(last_output_path):
         return send_file(last_output_path, as_attachment=True)
     return redirect(url_for('index'))
-
-if __name__ == "__main__":
-    import os
-    print("✅ Flask server started on Render")
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
 
 if __name__ == "__main__":
     import os
