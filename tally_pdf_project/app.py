@@ -148,6 +148,22 @@ def download_excel():
 
 @app.route('/download/xml')
 def download_xml():
+    from flask import Flask, render_template, request, send_file
+import os
+
+app = Flask(__name__)
+
+# --- Your routes and logic go here ---
+@app.route('/')
+def home():
+    return render_template("index.html")
+
+# Add your other routes here...
+
+# --- This part must be at the END ---
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
     return send_file("output/statement.xml", as_attachment=True)
 
 if __name__ == '__main__':
