@@ -82,7 +82,19 @@
       .download-btn a:hover {
           background-color: #218838;
       }
-  </style>
+
+      .watermark {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 50px;
+          color: rgba(0, 0, 0, 0.05);
+          z-index: 0;
+          pointer-events: none;
+          user-select: none;
+      }
+    </style>
 </head>
 <body>
   <h2>Upload Bank Statement PDF</h2>
@@ -93,6 +105,7 @@
   </form>
 
   {% if table %}
+      <div class="watermark">KANTHA RAO OFFICE DARSHAN</div>
       <div class="table-container">
           <h3 style="text-align:center;">Preview of Converted Data</h3>
           {{ table|safe }}
