@@ -31,6 +31,8 @@ def upload_files():
         with pdfplumber.open(filepath) as pdf:
             for page in pdf.pages:
                 text = page.extract_text()
+                if not text:
+                    continue
                 lines = text.split('\n')
 
                 for line in lines:
