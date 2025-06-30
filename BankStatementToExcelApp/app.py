@@ -59,20 +59,21 @@ def upload_files():
                     if deposit > 0:
                         amount = deposit
                         voucher_type = "Receipt"
+                        by_dr_text = ""
+                        to_cr_text = "SUSPENSE"
                     elif withdraw > 0:
                         amount = withdraw
                         voucher_type = "Payment"
+                        by_dr_text = "BANK CHARGES" if amount < 50 else "SUSPENSE"
+                        to_cr_text = ""
                     else:
                         continue
-
-                    # Check for bank charges in Payment vouchers below Rs. 50
-                    by_dr_text = "BANK CHARGES" if voucher_type == "Payment" and amount < 50 else ""
 
                     all_data.append({
                         "DATE": date,
                         "VOUCHER NO.": "",
                         "BY / DR": by_dr_text,
-                        "TO / CR": "",
+                        "TO / CR": to_cr_text,
                         "AMOUNT": amount,
                         "NARRATION": narration,
                         "VOUCHER TYPE": voucher_type,
@@ -95,6 +96,11 @@ def download_file():
     if last_output_path and os.path.exists(last_output_path):
         return send_file(last_output_path, as_attachment=True)
     return redirect(url_for('index'))
+
+if __name__ == "__main__":
+    import os
+    print("✅ Flask server started on Render")
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
 
 if __name__ == "__main__":
     import os
