@@ -5,6 +5,9 @@ import os
 from xml.etree.ElementTree import Element, SubElement, tostring
 from xml.dom.minidom import parseString
 from datetime import datetime
+import os
+app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+app.run(debug=True)
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
