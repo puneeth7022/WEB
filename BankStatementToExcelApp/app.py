@@ -42,27 +42,37 @@ def upload_files():
 
         with pdfplumber.open(filepath) as pdf:
             for page in pdf.pages:
-                text = page.extract_text()
-                lines = text.split('\n')
-
-                for line in lines:
-                    if 'B/F' in line.upper() or line.strip() == "":
+                lines = page.extract_text().split('\n')
+                i = 0
+                while i < len(lines):
+                    line = lines[i].strip()
+                    if not line or 'B/F' in line.upper():
+                        i += 1
                         continue
 
-                    parts = line.split()
+                    combined_line = line
+                    if i + 1 < len(lines):
+                        next_line = lines[i + 1].strip()
+                        if not next_line[:1].isdigit():
+                            combined_line += ' ' + next_line
+                            i += 1
+
+                    parts = combined_line.split()
                     if len(parts) < 6:
+                        i += 1
                         continue
 
                     try:
                         withdraw_str = parts[-3].replace(",", "").strip()
                         deposit_str = parts[-2].replace(",", "").strip()
-
                         withdraw = float(withdraw_str)
                         deposit = float(deposit_str)
-                    except ValueError:
+                    except:
+                        i += 1
                         continue
 
                     if withdraw == 0 and deposit == 0:
+                        i += 1
                         continue
 
                     narration = ' '.join(parts[2:-3]).upper()
@@ -85,6 +95,7 @@ def upload_files():
                         by_dr_text = "BANK CHARGES" if amount < 50 else matched_ledger
                         to_cr_text = ""
                     else:
+                        i += 1
                         continue
 
                     all_data.append({
@@ -93,10 +104,12 @@ def upload_files():
                         "BY / DR": by_dr_text,
                         "TO / CR": to_cr_text,
                         "AMOUNT": amount,
-                        "NARRATION": narration.title(),
+                        "NARRATION": "",  # Blank narration in preview
                         "VOUCHER TYPE": voucher_type,
                         "DAY": ""
                     })
+
+                    i += 1
 
     if all_data:
         df = pd.DataFrame(all_data)
@@ -119,6 +132,7 @@ if __name__ == "__main__":
     import os
     print("✅ Flask server started on Render")
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
