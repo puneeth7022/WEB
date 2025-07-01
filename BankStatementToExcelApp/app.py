@@ -24,12 +24,16 @@ def upload_files():
     ledger_file = request.files.get("ledger_file")
     all_data = []
 
-    # Load ledger keywords from uploaded Excel
+    # Load ledger keywords from uploaded Excel with error handling
     ledger_keywords = {}
-    if ledger_file:
-        ledger_df = pd.read_excel(ledger_file)
-        for name in ledger_df['Ledger Name']:
-            ledger_keywords[name.upper()] = name
+    if ledger_file and ledger_file.filename.endswith(('.xlsx', '.xls')):
+        try:
+            ledger_df = pd.read_excel(ledger_file)
+            for name in ledger_df['Ledger Name']:
+                ledger_keywords[name.upper()] = name
+        except Exception as e:
+            print("❌ Ledger file error:", e)
+            ledger_keywords = {}
 
     for file in uploaded_files:
         filename = secure_filename(file.filename)
@@ -115,5 +119,6 @@ if __name__ == "__main__":
     import os
     print("✅ Flask server started on Render")
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
