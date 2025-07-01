@@ -75,7 +75,7 @@ def upload_files():
                         i += 1
                         continue
 
-                    narration = ' '.join(parts[2:-3]).upper()
+                    narration = combined_line.upper()
                     date = parts[0]
 
                     matched_ledger = "SUSPENSE"
@@ -104,7 +104,7 @@ def upload_files():
                         "BY / DR": by_dr_text,
                         "TO / CR": to_cr_text,
                         "AMOUNT": amount,
-                        "NARRATION": "",  # Blank narration in preview
+                        "NARRATION": narration.title(),
                         "VOUCHER TYPE": voucher_type,
                         "DAY": ""
                     })
@@ -132,6 +132,7 @@ if __name__ == "__main__":
     import os
     print("✅ Flask server started on Render")
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
