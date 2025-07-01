@@ -75,7 +75,10 @@ def upload_files():
                         i += 1
                         continue
 
-                    narration = combined_line.upper()
+                    narration = ' '.join(parts[3:-3]).upper()
+                    if len(narration.strip()) < 3:
+                        narration = "NO NARRATION"
+
                     date = parts[0]
 
                     matched_ledger = "SUSPENSE"
@@ -132,6 +135,7 @@ if __name__ == "__main__":
     import os
     print("✅ Flask server started on Render")
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
