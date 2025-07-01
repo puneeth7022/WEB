@@ -80,8 +80,8 @@ def upload_files():
                         i += 1
                         continue
 
-                    tokens = combined_line.split()
-                    narration_tokens = [t for t in tokens if not t.replace(',', '').replace('.', '').isdigit()]
+                    # Clean narration without amounts
+                    narration_tokens = [t for t in combined_line.split() if not t.replace(',', '').replace('.', '').isdigit()]
                     narration = ' '.join(narration_tokens[3:]).upper()
                     if len(narration.strip()) < 3:
                         narration = "NO NARRATION"
