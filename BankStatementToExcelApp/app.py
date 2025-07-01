@@ -21,19 +21,7 @@ def index():
 def upload_files():
     global last_output_path
     uploaded_files = request.files.getlist("pdf_file")
-    ledger_file = request.files.get("ledger_file")
     all_data = []
-
-    # Load ledger keywords from uploaded Excel with error handling
-    ledger_keywords = {}
-    if ledger_file and ledger_file.filename.endswith(('.xlsx', '.xls')):
-        try:
-            ledger_df = pd.read_excel(ledger_file)
-            for name in ledger_df['Ledger Name']:
-                ledger_keywords[name.upper()] = name
-        except Exception as e:
-            print("❌ Ledger file error:", e)
-            ledger_keywords = {}
 
     for file in uploaded_files:
         filename = secure_filename(file.filename)
@@ -42,70 +30,43 @@ def upload_files():
 
         with pdfplumber.open(filepath) as pdf:
             for page in pdf.pages:
-                lines = page.extract_text().split('\n')
-                i = 0
-                while i < len(lines):
-                    line = lines[i].strip()
-                    if not line or 'B/F' in line.upper():
-                        i += 1
+                text = page.extract_text()
+                lines = text.split('\n')
+
+                for line in lines:
+                    if 'B/F' in line.upper() or line.strip() == "":
                         continue
 
-                    combined_line = line
-                    if i + 1 < len(lines):
-                        next_line = lines[i + 1].strip()
-                        if not next_line[:1].isdigit():
-                            combined_line += ' ' + next_line
-                            i += 1
-
-                    parts = combined_line.split()
+                    parts = line.split()
                     if len(parts) < 6:
-                        i += 1
                         continue
 
-                    # Extract last 3 numbers from line as withdraw, deposit, balance
                     try:
-                        numbers = [float(p.replace(',', '')) for p in parts if p.replace(',', '').replace('.', '').isdigit()]
-                        if len(numbers) >= 3:
-                            withdraw = numbers[-3]
-                            deposit = numbers[-2]
-                            balance = numbers[-1]
-                        else:
-                            i += 1
-                            continue
-                    except:
-                        i += 1
+                        withdraw_str = parts[-3].replace(",", "").strip()
+                        deposit_str = parts[-2].replace(",", "").strip()
+
+                        withdraw = float(withdraw_str)
+                        deposit = float(deposit_str)
+                    except ValueError:
                         continue
 
                     if withdraw == 0 and deposit == 0:
-                        i += 1
                         continue
 
-                    # Clean narration without amounts
-                    narration_tokens = [t for t in combined_line.split() if not t.replace(',', '').replace('.', '').isdigit()]
-                    narration = ' '.join(narration_tokens[3:]).upper()
-                    if len(narration.strip()) < 3:
-                        narration = "NO NARRATION"
-
+                    narration = ' '.join(parts[2:-3])
                     date = parts[0]
-
-                    matched_ledger = "SUSPENSE"
-                    for keyword in ledger_keywords:
-                        if any(k in narration for k in keyword.upper().split()):
-                            matched_ledger = ledger_keywords[keyword]
-                            break
 
                     if deposit > 0:
                         amount = deposit
                         voucher_type = "Receipt"
                         by_dr_text = ""
-                        to_cr_text = matched_ledger
+                        to_cr_text = "SUSPENSE"
                     elif withdraw > 0:
                         amount = withdraw
                         voucher_type = "Payment"
-                        by_dr_text = "BANK CHARGES" if amount < 50 else matched_ledger
+                        by_dr_text = "BANK CHARGES" if amount < 50 else "SUSPENSE"
                         to_cr_text = ""
                     else:
-                        i += 1
                         continue
 
                     all_data.append({
@@ -114,12 +75,10 @@ def upload_files():
                         "BY / DR": by_dr_text,
                         "TO / CR": to_cr_text,
                         "AMOUNT": amount,
-                        "NARRATION": narration.title(),
+                        "NARRATION": narration,
                         "VOUCHER TYPE": voucher_type,
                         "DAY": ""
                     })
-
-                    i += 1
 
     if all_data:
         df = pd.DataFrame(all_data)
@@ -137,6 +96,11 @@ def download_file():
     if last_output_path and os.path.exists(last_output_path):
         return send_file(last_output_path, as_attachment=True)
     return redirect(url_for('index'))
+
+if __name__ == "__main__":
+    import os
+    print("✅ Flask server started on Render")
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
 
 if __name__ == "__main__":
     import os
