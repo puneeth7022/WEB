@@ -54,6 +54,7 @@
           border-collapse: collapse;
           background-color: white;
           box-shadow: 0 0 10px rgba(0,0,0,0.05);
+          table-layout: fixed;
       }
 
       th, td {
@@ -61,6 +62,7 @@
           padding: 10px;
           font-size: 14px;
           text-align: left;
+          word-wrap: break-word;
       }
 
       th {
@@ -113,7 +115,9 @@
       <div class="watermark">KANTHA RAO OFFICE DARSHAN</div>
       <div class="table-container">
           <h3 style="text-align:center;">Preview of Converted Data</h3>
-          {{ table|safe }}
+          <div style="overflow-x:auto;">
+            {{ table|safe }}
+          </div>
       </div>
       <div class="download-btn">
           <a href="/download">Download Excel</a>
