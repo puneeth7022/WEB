@@ -21,7 +21,15 @@ def index():
 def upload_files():
     global last_output_path
     uploaded_files = request.files.getlist("pdf_file")
+    ledger_file = request.files.get("ledger_file")
     all_data = []
+
+    # Load ledger keywords from uploaded Excel
+    ledger_keywords = {}
+    if ledger_file:
+        ledger_df = pd.read_excel(ledger_file)
+        for name in ledger_df['Ledger Name']:
+            ledger_keywords[name.upper()] = name
 
     for file in uploaded_files:
         filename = secure_filename(file.filename)
@@ -29,11 +37,8 @@ def upload_files():
         file.save(filepath)
 
         with pdfplumber.open(filepath) as pdf:
-            for i in range(len(pdf.pages)):
-                page = pdf.pages[i]
+            for page in pdf.pages:
                 text = page.extract_text()
-                if not text:
-                    continue
                 lines = text.split('\n')
 
                 for line in lines:
@@ -45,30 +50,38 @@ def upload_files():
                         continue
 
                     try:
-                        withdraw_str = parts[-2].replace(",", "").strip()
+                        withdraw_str = parts[-3].replace(",", "").strip()
+                        deposit_str = parts[-2].replace(",", "").strip()
+
                         withdraw = float(withdraw_str)
-                        deposit = 0.0
+                        deposit = float(deposit_str)
                     except ValueError:
                         continue
 
-                    if withdraw == 0:
+                    if withdraw == 0 and deposit == 0:
                         continue
 
-                    narration_text = ' '.join(parts[1:-3]).upper()
+                    narration = ' '.join(parts[2:-3]).upper()
                     date = parts[0]
 
-                    is_card_sale = 'UPI' in narration_text or 'CARD' in narration_text
+                    matched_ledger = "SUSPENSE"
+                    for keyword in ledger_keywords:
+                        if keyword in narration:
+                            matched_ledger = ledger_keywords[keyword]
+                            break
 
-                    if is_card_sale:
+                    if deposit > 0:
+                        amount = deposit
                         voucher_type = "Receipt"
-                        amount = withdraw
                         by_dr_text = ""
-                        to_cr_text = "CARD SALES"
-                    else:
-                        voucher_type = "Payment"
+                        to_cr_text = matched_ledger
+                    elif withdraw > 0:
                         amount = withdraw
-                        by_dr_text = "BANK CHARGES" if amount < 50 else "SUSPENSE"
+                        voucher_type = "Payment"
+                        by_dr_text = "BANK CHARGES" if amount < 50 else matched_ledger
                         to_cr_text = ""
+                    else:
+                        continue
 
                     all_data.append({
                         "DATE": date,
@@ -76,7 +89,7 @@ def upload_files():
                         "BY / DR": by_dr_text,
                         "TO / CR": to_cr_text,
                         "AMOUNT": amount,
-                        "NARRATION": narration_text,
+                        "NARRATION": narration.title(),
                         "VOUCHER TYPE": voucher_type,
                         "DAY": ""
                     })
