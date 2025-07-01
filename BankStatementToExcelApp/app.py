@@ -83,7 +83,7 @@ def upload_files():
 
                     matched_ledger = "SUSPENSE"
                     for keyword in ledger_keywords:
-                        if keyword in narration:
+                        if any(k in narration for k in keyword.upper().split()):
                             matched_ledger = ledger_keywords[keyword]
                             break
 
@@ -135,6 +135,7 @@ if __name__ == "__main__":
     import os
     print("✅ Flask server started on Render")
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
