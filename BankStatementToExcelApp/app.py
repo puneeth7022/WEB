@@ -80,7 +80,9 @@ def upload_files():
                         i += 1
                         continue
 
-                    narration = ' '.join(parts[3:-3]).upper()
+                    tokens = combined_line.split()
+                    narration_tokens = [t for t in tokens if not t.replace(',', '').replace('.', '').isdigit()]
+                    narration = ' '.join(narration_tokens[3:]).upper()
                     if len(narration.strip()) < 3:
                         narration = "NO NARRATION"
 
@@ -140,6 +142,7 @@ if __name__ == "__main__":
     import os
     print("✅ Flask server started on Render")
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
