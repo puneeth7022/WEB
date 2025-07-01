@@ -62,11 +62,16 @@ def upload_files():
                         i += 1
                         continue
 
+                    # Extract last 3 numbers from line as withdraw, deposit, balance
                     try:
-                        withdraw_str = parts[-3].replace(",", "").strip()
-                        deposit_str = parts[-2].replace(",", "").strip()
-                        withdraw = float(withdraw_str)
-                        deposit = float(deposit_str)
+                        numbers = [float(p.replace(',', '')) for p in parts if p.replace(',', '').replace('.', '').isdigit()]
+                        if len(numbers) >= 3:
+                            withdraw = numbers[-3]
+                            deposit = numbers[-2]
+                            balance = numbers[-1]
+                        else:
+                            i += 1
+                            continue
                     except:
                         i += 1
                         continue
@@ -135,6 +140,7 @@ if __name__ == "__main__":
     import os
     print("✅ Flask server started on Render")
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+
 
 
 
